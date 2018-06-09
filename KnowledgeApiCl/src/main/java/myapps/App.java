@@ -59,7 +59,7 @@ public class App {
         
         try {
             String json = mapper.writeValueAsString(knowledge);
-            System.out.println(json);
+            //System.out.println(json);
             
             String result = postJson(url + "/api/knowledges", json);
             System.out.println(result);
