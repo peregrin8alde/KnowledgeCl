@@ -4,7 +4,8 @@ URL="http://knowledge:8080"
 TOKEN="F1TM3vOLMkHWDx0QJTzaBvltjZW6QAZwNVR0B3UnqF1IUrPfp4LM8SpadOUVlwWl"
 TITLE="title1"
 TAGS="api,/aaaa/bbb/ccc.md"
+CONTENTFILE="../README.md"
 
-./run.sh $URL $TOKEN $TITLE $TAGS
+./run.sh $URL $TOKEN $TITLE $TAGS $CONTENTFILE
 
 exit 0;
