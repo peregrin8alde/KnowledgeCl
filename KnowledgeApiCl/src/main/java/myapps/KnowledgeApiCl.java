@@ -35,13 +35,14 @@ public class KnowledgeApiCl {
         this.token = token;
     }
     
-    public void postKnowledge(String title, String tags, String fileName) {
+    public void postKnowledge(String title, String tags, int publicFlag, String fileName) {
         Knowledge knowledge = new Knowledge(title);
         
         if (tags.length() != 0) {
             List<String> listTags = Arrays.asList(tags.split(","));
             knowledge.setTags(listTags);
         }
+        knowledge.setPublicFlag(publicFlag);
         knowledge.setContent(readTextFileAll(fileName));
         
         ObjectMapper mapper = new ObjectMapper();

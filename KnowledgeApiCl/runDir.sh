@@ -4,6 +4,7 @@ URL=$1
 TOKEN=$2
 BASEDIRNAME=$3
 CONTENTSDIR=$4
+PRVIVATE=$5
 
 find $CONTENTSDIR -name "*.md" | while read FILE
 do
@@ -20,6 +21,7 @@ do
            -token $TOKEN \
            -title $TITLE \
            -tags $TAGS \
+           $PRVIVATE \
            -file $CONTENTFILE
 done
 

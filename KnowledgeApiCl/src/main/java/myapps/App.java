@@ -16,7 +16,8 @@ public class App {
     private static String mode;
     private static String title;
     private static String tags;
-    private static String fileName;
+    private static int prublicFlag;
+    private static String file;
     
     public static void main( String[] args ) {
         Option optUrl = Option.builder("url").longOpt("url")
@@ -42,7 +43,8 @@ public class App {
                                   .hasArg()
                                   .desc("use given tags")
                                   .build();
-        Option optFileName = Option.builder("file").longOpt("file")
+        Option optPrivate = new Option("private", "be private");
+        Option optFile = Option.builder("file").longOpt("file")
                                   .hasArg()
                                   .desc("use given Local Markdown file name")
                                   .build();
@@ -53,7 +55,8 @@ public class App {
         options.addOption(optMode);
         options.addOption(optTitle);
         options.addOption(optTags);
-        options.addOption(optFileName);
+        options.addOption(optPrivate);
+        options.addOption(optFile);
 
         // create the parser
         CommandLineParser parser = new DefaultParser();
@@ -77,15 +80,18 @@ public class App {
             if( line.hasOption( "tags" ) ) {
                 tags = line.getOptionValue( "tags" );
             }
+            if( line.hasOption( "private" ) ) {
+                prublicFlag = 1;
+            }
             if( line.hasOption( "file" ) ) {
-                fileName = line.getOptionValue( "file" );
+                file = line.getOptionValue( "file" );
             }
     
             KnowledgeApiCl cl = new KnowledgeApiCl(url, token);
             
             switch (mode) {
                 case "POST":
-                    cl.postKnowledge(title, tags, fileName);
+                    cl.postKnowledge(title, tags, prublicFlag, file);
                     break;
                 case "DEL":
                     cl.deleteKnowledges(title, tags);
