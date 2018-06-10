@@ -87,6 +87,9 @@ public class App {
                 case "POST":
                     cl.postKnowledge(title, tags, fileName);
                     break;
+                case "DEL":
+                    cl.deleteKnowledges(title, tags);
+                    break;
             }
         }
         catch( ParseException exp ) {

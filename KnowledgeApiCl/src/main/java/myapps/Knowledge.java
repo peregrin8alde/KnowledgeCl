@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 
-@JsonIgnoreProperties({})
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Knowledge {
     
+    private int knowledgeId;
     private List<String> attachments;
     private int commentCount;
     private List<String> comments;
@@ -17,14 +18,19 @@ public class Knowledge {
     private String template;
     private String title;
 
+    // 引数なしのコンストラクタがないとJson文字列=>Javaオブジェクト変換で怒られる
+    public Knowledge() {
+        this.attachments = new ArrayList<String>();
+        this.comments = new ArrayList<String>();
+        this.tags = new ArrayList<String>();
+    }
+    
     public Knowledge(String title) {
         this.title = title;
         
         this.attachments = new ArrayList<String>();
-        this.commentCount = 0;
         this.comments = new ArrayList<String>();
         this.content = "";
-        this.publicFlag = 0;
         this.tags = new ArrayList<String>();
         this.template = "knowledge";
     }
@@ -45,6 +51,20 @@ public class Knowledge {
         this.publicFlag = publicFlag;
     }
 
+    public int getKnowledgeId() {
+        return this.knowledgeId;
+    }
     
+    public String getTitle() {
+        return this.title;
+    }
+    
+    public String getContetns() {
+        return this.content;
+    }
+    
+    public List<String> getTags() {
+        return this.tags;
+    }
     
 }
