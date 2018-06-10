@@ -15,8 +15,12 @@ do
   TAGS="api,path:$BASEDIRNAME/${FILE#$CONTENTSDIR}"
   CONTENTFILE=${FILE}
 
-  java -cp target/KnowledgeApiCl-1.0-SNAPSHOT.jar:target/dependency/* \
-    myapps.App $URL $TOKEN $TITLE $TAGS $CONTENTFILE
+  ./run.sh -mode "POST" \
+           -url $URL \
+           -token $TOKEN \
+           -title $TITLE \
+           -tags $TAGS \
+           -file $CONTENTFILE
 done
 
 
