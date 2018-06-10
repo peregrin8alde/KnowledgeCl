@@ -1,93 +1,99 @@
 package myapps;
 
-import java.io.IOException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Option.Builder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.annotation.*;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class App {
-    
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    private String url;
-    private String token;
-    
-    public App(String url, String token) {
-        this.url = url;
-        this.token = token;
-    }
+    private static String url;
+    private static String token;
+    private static String mode;
+    private static String title;
+    private static String tags;
+    private static String fileName;
     
     public static void main( String[] args ) {
-        String url = args[0];
-        String token = args[1];
-        String titel = args[2];
-        String tags = args[3];
-        String fileName = args[4];
+        Option optUrl = Option.builder("url").longOpt("url")
+                                  .hasArg()
+                                  .required()
+                                  .desc("use given Knowledge service URL")
+                                  .build();
+        Option optToken = Option.builder("token").longOpt("token")
+                                  .hasArg()
+                                  .required()
+                                  .desc("use given Access Token")
+                                  .build();
+        Option optMode = Option.builder("mode").longOpt("mode")
+                                  .hasArg()
+                                  .required()
+                                  .desc("use given mode")
+                                  .build();
+        Option optTitle = Option.builder("title").longOpt("title")
+                                  .hasArg()
+                                  .desc("use given title")
+                                  .build();
+        Option optTags = Option.builder("tags").longOpt("tags")
+                                  .hasArg()
+                                  .desc("use given tags")
+                                  .build();
+        Option optFileName = Option.builder("file").longOpt("file")
+                                  .hasArg()
+                                  .desc("use given Local Markdown file name")
+                                  .build();
+                                
+        Options options = new Options();
+        options.addOption(optUrl);
+        options.addOption(optToken);
+        options.addOption(optMode);
+        options.addOption(optTitle);
+        options.addOption(optTags);
+        options.addOption(optFileName);
 
-        App app = new App(url, token);
-        app.postKnowledge(titel, tags, fileName);
-    }
-    
-    public void postKnowledge(String titel, String tags, String fileName) {
-        Knowledge knowledge = new Knowledge(titel);
-        
-        if (tags.length() != 0) {
-            List<String> listTags = Arrays.asList(tags.split(","));
-            knowledge.setTags(listTags);
-        }
-        knowledge.setContent(readTextFileAll(fileName));
-        
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        
+        // create the parser
+        CommandLineParser parser = new DefaultParser();
         try {
-            String json = mapper.writeValueAsString(knowledge);
-            //System.out.println(json);
+            // parse the command line arguments
+            CommandLine line = parser.parse( options, args );
+
+            // set App fields
+            if( line.hasOption( "url" ) ) {
+                url = line.getOptionValue( "url" );
+            }
+            if( line.hasOption( "token" ) ) {
+                token = line.getOptionValue( "token" );
+            }
+            if( line.hasOption( "mode" ) ) {
+                mode = line.getOptionValue( "mode" );
+            }
+            if( line.hasOption( "title" ) ) {
+                title = line.getOptionValue( "title" );
+            }
+            if( line.hasOption( "tags" ) ) {
+                tags = line.getOptionValue( "tags" );
+            }
+            if( line.hasOption( "file" ) ) {
+                fileName = line.getOptionValue( "file" );
+            }
+    
+            KnowledgeApiCl cl = new KnowledgeApiCl(url, token);
             
-            String result = postJson(url + "/api/knowledges", json);
-            System.out.println(result);
-        } catch (IOException e) {
-            e.printStackTrace();
+            switch (mode) {
+                case "POST":
+                    cl.postKnowledge(title, tags, fileName);
+                    break;
+            }
         }
-    }
-    
-    private String postJson(String url, String json) throws IOException {
-        OkHttpClient client = new OkHttpClient();
-        
-        RequestBody body = RequestBody.create(JSON, json);
-        Request request = new Request.Builder().url(url)
-            .header("PRIVATE-TOKEN", token)
-            .post(body)
-            .build();
-        try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
-        }
-    }
-    
-    public String readTextFileAll(String fileName) {
-        try (Stream<String> stream = Files.lines(Paths.get(fileName), StandardCharsets.UTF_8)) {
-            return stream.collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            e.printStackTrace();
+        catch( ParseException exp ) {
+            // oops, something went wrong
+            System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
         }
         
-        return null;
     }
+
 }

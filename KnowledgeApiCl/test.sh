@@ -6,6 +6,11 @@ TITLE="title1"
 TAGS="api,path:/aaaa/bbb/ccc.md"
 CONTENTFILE="../README.md"
 
-./run.sh $URL $TOKEN $TITLE $TAGS $CONTENTFILE
+./run.sh -mode "POST" \
+         -url $URL \
+         -token $TOKEN \
+         -title $TITLE \
+         -tags $TAGS \
+         -file $CONTENTFILE
 
 exit 0;
