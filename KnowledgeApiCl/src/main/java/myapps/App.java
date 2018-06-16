@@ -18,6 +18,7 @@ public class App {
     private static String tags;
     private static int prublicFlag;
     private static String file;
+    private static String dir;
     
     public static void main( String[] args ) {
         Option optUrl = Option.builder("url").longOpt("url")
@@ -48,7 +49,11 @@ public class App {
                                   .hasArg()
                                   .desc("use given Local Markdown file name")
                                   .build();
-                                
+        Option optDir = Option.builder("dir").longOpt("dir")
+                                  .hasArg()
+                                  .desc("use given Local dir name")
+                                  .build();
+                                  
         Options options = new Options();
         options.addOption(optUrl);
         options.addOption(optToken);
@@ -57,6 +62,7 @@ public class App {
         options.addOption(optTags);
         options.addOption(optPrivate);
         options.addOption(optFile);
+        options.addOption(optDir);
 
         // create the parser
         CommandLineParser parser = new DefaultParser();
@@ -86,6 +92,9 @@ public class App {
             if( line.hasOption( "file" ) ) {
                 file = line.getOptionValue( "file" );
             }
+            if( line.hasOption( "dir" ) ) {
+                dir = line.getOptionValue( "dir" );
+            }
     
             KnowledgeApiCl cl = new KnowledgeApiCl(url, token);
             
@@ -95,6 +104,9 @@ public class App {
                     break;
                 case "DEL":
                     cl.deleteKnowledges(title, tags);
+                    break;
+                case "GET":
+                    cl.getKnowledges(title, tags, dir);
                     break;
             }
         }
