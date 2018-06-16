@@ -12,6 +12,10 @@ import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
+import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.Path;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.annotation.*;
@@ -94,6 +98,71 @@ public class KnowledgeApiCl {
                 
                 String result = delete(baseUrl + "/api/knowledges/" + knowledge.getKnowledgeId());
                 System.out.println("DEL : " + knowledge.getKnowledgeId() + ", " + result);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getKnowledges(String title, String tags, String dirName) {
+
+        List<String> listTags = new ArrayList<String>();
+        if (tags != null) {
+            if (tags.length() != 0) {
+                listTags.addAll(Arrays.asList(tags.split(",")));
+            }
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        try {
+            // 一覧取得
+            // API上はoffsetとlimitパラメタがある。
+            // limitは最大50
+            // https://github.com/support-project/knowledge/blob/8423ec9d7ce62ba932849a538aae89954c9a6e57/src/main/java/org/support/project/web/control/GetApiControl.java
+            int offset = 0;
+            int limit = 50;
+            
+            for (offset = 0; true; offset += limit) {
+                String strListKnowledgeJson = get(baseUrl + "/api/knowledges?" + "offset=" + offset + "&limit=" + limit);
+                List<Knowledge> listKnowledge = mapper.readValue(strListKnowledgeJson, new TypeReference<List<Knowledge>>(){});
+                if (listKnowledge.size() == 0) {
+                    break;
+                }
+                
+                for (Knowledge knowledge : listKnowledge) {
+                    String targetTitle = knowledge.getTitle();
+                    List<String> targetTags = knowledge.getTags();
+                    
+                    if (title != null) {
+                        if ( !title.equals(targetTitle) ) {
+                            continue;
+                        }
+                    }
+                    
+                    if (tags != null) {
+                        if ( !targetTags.containsAll(listTags) ) {
+                            continue;
+                        }
+                    }
+                    
+                    // set local file path
+                    String localFileName = dirName + "/" + targetTitle + ".md";
+                    for (String tag : targetTags) {
+                        if (tag.startsWith("path:")) {
+                            localFileName = dirName + tag.replaceAll("path:", "");
+                        }
+                    }
+                    
+                    File localFile = new File(localFileName);
+                    localFile.getCanonicalFile().getParentFile().mkdirs();
+                    
+                    Path localPath = Paths.get(localFile.getCanonicalPath());
+                    Files.write(localPath, knowledge.getContetns().getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
+                    
+                    String result = "title : " + targetTitle + ", localPath : " + localPath;
+                    System.out.println("GET : " + knowledge.getKnowledgeId() + ", " + result);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
